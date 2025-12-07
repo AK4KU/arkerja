@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"="width=device-width, initial-scale=1.0">
+    <title>AR Experience - Inline</title>
+    
+    <!-- A-Frame dan AR.js -->
+    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+    
+    <link rel="stylesheet" href="style.css">
+    
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+        }
+        
+        .ar-scene {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+        
+        #loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #2196F3;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            color: white;
+        }
+        
+        #loading-overlay.hidden {
+            display: none;
+        }
+        
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loading-overlay">
+        <div class="spinner"></div>
+        <p style="margin-top: 20px; font-size: 1.2rem;">Memuat AR...</p>
+        <p style="margin-top: 10px; font-size: 0.9rem; opacity: 0.8;">Izinkan akses kamera</p>
+    </div>
+
+    <!-- A-Frame AR Scene -->
+    <a-scene
+        class="ar-scene"
+        embedded
+        arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3;"
+        vr-mode-ui="enabled: false"
+        renderer="logarithmicDepthBuffer: true; precision: medium; antialias: true;"
+        loading-screen="enabled: false">
+        
+        <!-- Kamera -->
+        <a-camera gps-camera rotation-reader></a-camera>
+        
+        <!-- Marker Hiro - Model akan muncul di sini -->
+        <a-marker preset="hiro" id="main-marker" emitevents="true" smooth="true" smoothCount="10" smoothTolerance="0.01" smoothThreshold="5">
+            <!-- Container untuk model 3D -->
+            <a-entity 
+                id="model-entity" 
+                position="0 0.5 0" 
+                scale="1 1 1"
+                rotation="0 0 0"
+                animation="property: rotation; to: 0 360 0; loop: true; dur: 10000; easing: linear;">
+            </a-entity>
+            
+            <!-- Text info profesi -->
+            <a-text 
+                id="job-text" 
+                value="Loading..." 
+                position="0 2 0" 
+                align="center" 
+                color="#2196F3"
+                width="3"
+                wrap-count="20">
+            </a-text>
+        </a-marker>
+        
+        <!-- Marker Pattern Entity (jika ingin custom pattern) -->
+        <a-entity camera></a-entity>
+    </a-scene>
+
+    <!-- UI Overlay -->
+    <div class="ar-overlay" style="pointer-events: none;">
+        <!-- Tombol kembali -->
+        <div class="back-button" onclick="goBack()" style="pointer-events: auto;">
+            ← Kembali
+        </div>
+
+        <!-- Info profesi (di bagian bawah) -->
+        <div class="job-info" style="pointer-events: auto;">
+            <h2 id="job-title">Loading...</h2>
+            <p id="job-description">Arahkan kamera ke Hiro Marker</p>
+            <p style="font-size: 0.85rem; margin-top: 10px; opacity: 0.8;">
+                💡 Download marker: <a href="https://raw.githubusercontent.com/AR-js-org/AR.js/master/data/images/hiro.png" target="_blank" style="color: #2196F3; text-decoration: underline;">Hiro Marker</a>
+            </p>
+        </div>
+
+        <!-- Marker Detection Status -->
+        <div id="marker-status" style="
+            position: fixed;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            backdrop-filter: blur(10px);
+            pointer-events: none;
+        ">
+            🔍 Cari marker...
+        </div>
+    </div>
+
+    <script>
+        // Fungsi kembali
+        function goBack() {
+            window.location.href = 'index.html';
+        }
+
+        // Ambil parameter URL
+        function getURLParameters() {
+            const params = new URLSearchParams(window.location.search);
+            return {
+                job: params.get('job') || 'police'
+            };
+        }
+
+        // Data profesi
+        const jobData = {
+            police: {
+                title: "Polisi",
+                description: "Polisi adalah penegak hukum yang bertugas menjaga keamanan dan ketertiban masyarakat.",
+                modelPath: "Asset/polisi.glb"
+            },
+            doctor: {
+                title: "Dokter",
+                description: "Dokter adalah tenaga medis profesional yang mendiagnosis dan mengobati penyakit.",
+                modelPath: "Asset/dokter.glb"
+            },
+            firefighter: {
+                title: "Pemadam Kebakaran",
+                description: "Pemadam kebakaran adalah pahlawan yang memadamkan api dan menyelamatkan nyawa.",
+                modelPath: "Asset/pemadam.glb"
+            },
+            teacher: {
+                title: "Guru",
+                description: "Guru adalah pendidik yang mengajarkan ilmu pengetahuan dan membentuk karakter generasi muda.",
+                modelPath: "Asset/guru.glb"
+            }
+        };
+
+        // Initialize
+        window.addEventListener('load', () => {
+            console.log('AR Inline Loading...');
+            
+            // Get job parameter
+            const params = getURLParameters();
+            const job = jobData[params.job];
+            
+            if (!job) {
+                alert('Profesi tidak ditemukan!');
+                goBack();
+                return;
+            }
+            
+            // Update UI
+            document.getElementById('job-title').textContent = job.title;
+            document.getElementById('job-description').textContent = job.description;
+            
+            // Wait for A-Frame to initialize
+            const scene = document.querySelector('a-scene');
+            const marker = document.querySelector('#main-marker');
+            const modelEntity = document.querySelector('#model-entity');
+            const markerStatus = document.getElementById('marker-status');
+            
+            scene.addEventListener('loaded', () => {
+                console.log('A-Frame scene loaded');
+                
+                // Load model GLB
+                console.log('Loading model:', job.modelPath);
+                modelEntity.setAttribute('gltf-model', job.modelPath);
+                
+                // Hide loading after scene is ready
+                setTimeout(() => {
+                    document.getElementById('loading-overlay').classList.add('hidden');
+                }, 1500);
+            });
+            
+            // Marker found event
+            marker.addEventListener('markerFound', () => {
+                console.log('✅ Marker detected!');
+                markerStatus.textContent = '✅ Marker terdeteksi!';
+                markerStatus.style.background = 'rgba(76, 175, 80, 0.9)';
+            });
+            
+            // Marker lost event
+            marker.addEventListener('markerLost', () => {
+                console.log('❌ Marker lost');
+                markerStatus.textContent = '🔍 Cari marker...';
+                markerStatus.style.background = 'rgba(0, 0, 0, 0.7)';
+            });
+            
+            // Error handling
+            scene.addEventListener('arjs-error', (e) => {
+                console.error('AR.js Error:', e);
+                alert('Error saat memulai AR. Pastikan kamera diizinkan.');
+            });
+        });
+    </script>
+</body>
+</html>

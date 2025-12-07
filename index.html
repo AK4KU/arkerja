@@ -62,8 +62,9 @@
          * @param {string} jobName - Nama profesi yang dipilih (police, doctor, firefighter, teacher)
          */
         function selectJob(jobName) {
-            // Redirect ke halaman ar.html dengan query parameter job
-            window.location.href = `ar.html?job=${jobName}`;
+            // Redirect ke halaman ar-inline.html untuk AR langsung di browser
+            // Atau gunakan ar.html untuk model-viewer (keluar ke Scene Viewer)
+            window.location.href = `ar-inline.html?job=${jobName}`;
         }
     </script>
 </body>
