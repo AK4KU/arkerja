@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AR Experience</title>
+    
+    <!-- A-Frame dan AR.js untuk AR yang lebih stabil -->
+    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+    
+    <link rel="stylesheet" href="style.css">
+    
+    <style>
+        .ar-scene {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body class="ar-page">
+    
+    <!-- A-Frame Scene untuk AR -->
+    <a-scene
+        embedded
+        arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3;"
+        class="ar-scene"
+        vr-mode-ui="enabled: false"
+        renderer="logarithmicDepthBuffer: true; precision: medium;"
+        loading-screen="enabled: false">
+        
+        <!-- Kamera AR -->
+        <a-camera gps-camera rotation-reader></a-camera>
+        
+        <!-- Marker Pattern - akan menampilkan model saat marker terdeteksi -->
+        <a-marker preset="hiro" id="marker">
+            <!-- Model 3D akan di-load di sini oleh JavaScript -->
+            <a-entity id="model-container" position="0 0 0" scale="0.5 0.5 0.5"></a-entity>
+        </a-marker>
+    </a-scene>
+
+    <!-- UI Overlay -->
+    <div class="ar-overlay">
+        <!-- Tombol kembali -->
+        <div class="back-button" onclick="goBack()">
+            ← Kembali
+        </div>
+
+        <!-- Info profesi (di bagian bawah) -->
+        <div class="job-info">
+            <h2 id="job-title">Loading...</h2>
+            <p id="job-description">Menginisialisasi AR...</p>
+        </div>
+
+        <!-- Loading indicator -->
+        <div id="loading-screen">
+            <div class="spinner"></div>
+            <p>Memuat AR Experience...</p>
+            <p class="loading-tip">Arahkan kamera ke <strong>Hiro Marker</strong></p>
+            <p class="loading-tip" style="font-size: 0.8rem;">Download marker: <a href="https://raw.githubusercontent.com/AR-js-org/AR.js/master/data/images/hiro.png" target="_blank" style="color: white; text-decoration: underline;">Hiro Marker</a></p>
+        </div>
+
+        <!-- Status AR -->
+        <div id="ar-status" class="ar-status hidden">
+            <p>👁️ Arahkan kamera ke Hiro Marker</p>
+        </div>
+    </div>
+
+    <script>
+        // Fungsi kembali
+        function goBack() {
+            window.location.href = 'index.html';
+        }
+
+        // Ambil parameter URL
+        function getURLParameters() {
+            const params = new URLSearchParams(window.location.search);
+            return {
+                job: params.get('job') || 'police'
+            };
+        }
+
+        // Data profesi
+        const jobData = {
+            police: {
+                title: "Polisi",
+                description: "Polisi adalah penegak hukum yang bertugas menjaga keamanan dan ketertiban masyarakat.",
+                modelPath: "Asset/polisi.glb"
+            },
+            doctor: {
+                title: "Dokter",
+                description: "Dokter adalah tenaga medis profesional yang mendiagnosis dan mengobati penyakit.",
+                modelPath: "Asset/dokter.glb"
+            },
+            firefighter: {
+                title: "Pemadam Kebakaran",
+                description: "Pemadam kebakaran adalah pahlawan yang memadamkan api dan menyelamatkan nyawa.",
+                modelPath: "Asset/pemadam.glb"
+            },
+            teacher: {
+                title: "Guru",
+                description: "Guru adalah pendidik yang mengajarkan ilmu pengetahuan dan membentuk karakter generasi muda.",
+                modelPath: "Asset/guru.glb"
+            }
+        };
+
+        // Initialize
+        window.addEventListener('DOMContentLoaded', () => {
+            const params = getURLParameters();
+            const job = jobData[params.job];
+            
+            if (job) {
+                document.getElementById('job-title').textContent = job.title;
+                document.getElementById('job-description').textContent = job.description;
+                
+                // Load model ke marker
+                const container = document.getElementById('model-container');
+                container.setAttribute('gltf-model', job.modelPath);
+                container.setAttribute('animation', 'property: rotation; to: 0 360 0; loop: true; dur: 10000');
+            }
+
+            // Hide loading after 2 seconds
+            setTimeout(() => {
+                document.getElementById('loading-screen').classList.add('hidden');
+                document.getElementById('ar-status').classList.remove('hidden');
+                
+                setTimeout(() => {
+                    document.getElementById('ar-status').classList.add('hidden');
+                }, 5000);
+            }, 2000);
+        });
+    </script>
+</body>
+</html>

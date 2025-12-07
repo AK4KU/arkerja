@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AR Pengenalan Profesi</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Container utama halaman -->
+    <div class="container">
+        <!-- Header aplikasi -->
+        <header class="header">
+            <h1>🎓 AR Pengenalan Profesi</h1>
+            <p>Pilih profesi untuk memulai pengalaman AR</p>
+        </header>
+
+        <!-- Grid daftar profesi -->
+        <div class="job-grid">
+            <!-- Card Polisi -->
+            <div class="job-card" onclick="selectJob('police')">
+                <div class="job-icon">👮</div>
+                <h2>Polisi</h2>
+                <p>Penjaga keamanan masyarakat</p>
+                <button class="btn-ar">Lihat AR</button>
+            </div>
+
+            <!-- Card Dokter -->
+            <div class="job-card" onclick="selectJob('doctor')">
+                <div class="job-icon">👨‍⚕️</div>
+                <h2>Dokter</h2>
+                <p>Penyembuh dan penolong orang sakit</p>
+                <button class="btn-ar">Lihat AR</button>
+            </div>
+
+            <!-- Card Pemadam Kebakaran -->
+            <div class="job-card" onclick="selectJob('firefighter')">
+                <div class="job-icon">🚒</div>
+                <h2>Pemadam Kebakaran</h2>
+                <p>Pahlawan pemadam api</p>
+                <button class="btn-ar">Lihat AR</button>
+            </div>
+
+            <!-- Card Guru -->
+            <div class="job-card" onclick="selectJob('teacher')">
+                <div class="job-icon">👩‍🏫</div>
+                <h2>Guru</h2>
+                <p>Pendidik generasi masa depan</p>
+                <button class="btn-ar">Lihat AR</button>
+            </div>
+        </div>
+
+        <!-- Footer informasi -->
+        <footer class="footer">
+            <p>Arahkan kamera ke permukaan datar untuk melihat model 3D</p>
+        </footer>
+    </div>
+
+    <script>
+        /**
+         * Fungsi untuk memilih profesi dan navigasi ke halaman AR
+         * @param {string} jobName - Nama profesi yang dipilih (police, doctor, firefighter, teacher)
+         */
+        function selectJob(jobName) {
+            // Redirect ke halaman ar.html dengan query parameter job
+            window.location.href = `ar.html?job=${jobName}`;
+        }
+    </script>
+</body>
+</html>
